@@ -1,0 +1,29 @@
+name: 'gha-private-auth'
+description: 'A GitHub action to generate a token for use with other private repositories, such as private submodules'
+author: 'aro5000'
+branding:
+  icon: 'lock'
+  color: 'gray-dark'
+inputs:
+  pem:
+    description: 'The PEM file from your GitHub app'
+    default: ''
+    required: true
+
+  appId:
+    description: 'The app ID of your GitHub app'
+    default: ''
+    required: true
+
+  installId:
+    description: 'The installation ID of your GitHub app'
+    default: ''
+    required: true
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.pem }}
+    - ${{ inputs.appId }}
+    - ${{ inputs.installId }}
