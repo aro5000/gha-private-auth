@@ -27,24 +27,22 @@ func main() {
 	appId := os.Args[2]
 	installId := os.Args[3]
 
+	// first, parse the PEM string to use for creating a JWT
 	key, err := parsePem(pemStr)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	id, err := strconv.Atoi(appId)
+	// create the JWT which is used as auth to the GitHub API to get a token
+	jwt, err := createJwt(key, appId, time.Now().Unix())
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	jwt, err := createJwt(key, id)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
+	// auth to GitHub and retrieve the token to be used for git or other workflows
+	// as the GitHub app
 	token, err := getToken(jwt, installId)
 	if err != nil {
 		fmt.Println(err)
@@ -68,15 +66,20 @@ func parsePem(pemStr string) (*rsa.PrivateKey, error) {
 
 }
 
-func createJwt(key *rsa.PrivateKey, appId int) (string, error) {
+func createJwt(key *rsa.PrivateKey, appId string, currentUnixDate int64) (string, error) {
 
-	t := time.Now().Unix()
+	// convert app ID to int for JWT
+	id, err := strconv.Atoi(appId)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256,
 		jwt.MapClaims{
-			"iat": t,
-			"exp": t + 600,
-			"iss": appId,
+			"iat": currentUnixDate,
+			"exp": currentUnixDate + 600, // 10 minute expiration
+			"iss": id,
 		})
 
 	jwt, err := token.SignedString(key)
@@ -104,6 +107,7 @@ func getToken(jwt, installId string) (string, error) {
 
 	client := http.Client{Timeout: 10 * time.Second}
 
+	// Retry 5 times in case of transient network issue
 	resp, err := client.Do(req)
 	if err != nil {
 		failed := true
