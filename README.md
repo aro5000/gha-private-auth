@@ -9,7 +9,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: aro5000/gha-private-auth@v1.0.0
+      - uses: aro5000/gha-private-auth@v1
         id: token-generator
         with:
           pem: ${{ secrets.APP_PEM }}
