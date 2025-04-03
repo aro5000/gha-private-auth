@@ -22,7 +22,7 @@ inputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/aro5000/gha-private-auth@sha256:341d6e7ca956bc9e67c24c137b4eaed71b1929414caa271c03d2f54f313346c4'
+  image: 'docker://ghcr.io/aro5000/gha-private-auth@sha256:45d597a6affe3a351b728d4b8ef70a379d7976eaa8b924778a9933208c0e3b73'
   args:
     - ${{ inputs.pem }}
     - ${{ inputs.appId }}
